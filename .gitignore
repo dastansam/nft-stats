@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Dynamic data files that change on every launch
+data/
+
 # C extensions
 *.so
 

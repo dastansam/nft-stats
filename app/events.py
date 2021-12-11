@@ -62,7 +62,7 @@ def fetch_events(
         address = event.contract_abi.address
 
     if topics is None:
-        topics = []
+        topics = ["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"]
 
     event_abi = event._get_event_abi()
     event_codec = event.web3.codec

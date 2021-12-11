@@ -2,13 +2,13 @@ from app.utils import instantiate_web3
 from app.config import INFURA_URL
 from app.classes.contract import ERC20Contract
 
-COMPOUND_ADDRESS = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
+COMPOUND_ADDRESS = "0xc00e94cb662c3520282e6f5717214004a7f26888"
 print("Launching app ...")
 def main():
     web3 = instantiate_web3(INFURA_URL)
     print("Instantiating contract...")
     checksum_address = web3.toChecksumAddress(COMPOUND_ADDRESS)
-    contract = ERC20Contract(web3, checksum_address, name="Aave", symbol="aave")
+    contract = ERC20Contract(web3, checksum_address, name="Comp", symbol="comp")
     print("Getting logs ...")
     
     from_block = web3.eth.block_number - 1000

@@ -66,6 +66,9 @@ class ERC20Contract(BaseContract):
         """
         Fetch all Transfer events in the blockchain
         and save them to the csv file
+        Infura only allows to fetch events in the span of 100 blocks
+        Therefore, we need to fetch the events in batches
+        and stop the loop when we have zero events in 1000 blocks
         """
         web3_contract = self.to_token_contract()
         
