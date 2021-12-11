@@ -1,8 +1,33 @@
-from web3._utils.abi import get_constructor_abi, merge_args_and_kwargs
-from web3._utils.events import get_event_data
+import eth_utils
 from web3._utils.filters import construct_event_filter_params
-from web3._utils.contracts import encode_abi
+from app.utils import format_address
+from app.config import TRANSFER_TOPIC
 
+
+def process_event(event):
+    """
+    Process an event, return arguments.
+    TO-DO: Currently only decodes a Transfer event,
+    should make it more generic.
+
+    :param event: The event.
+    :type event: dict
+    """
+    # topics contain the transactors addresses
+    from_ = format_address(event['topics'][1])
+    to = format_address(event['topics'][2])
+    # data is hex encoded, is the amount of tokens transferred
+    value = int(event['data'], 16)
+    
+    args = {
+        'from': from_,
+        'to': to,
+        'value': value,
+    }
+    return {
+        'args': args,
+    }
+    
 
 def fetch_events(
     event,
@@ -39,19 +64,23 @@ def fetch_events(
     if topics is None:
         topics = []
 
-    event_abi = event.get_abi()
-    event_topic = event_abi['topic']
+    event_abi = event._get_event_abi()
+    event_codec = event.web3.codec
 
-    if event_topic not in topics:
-        topics.append(event_topic)
-
-    event_filter_params = construct_event_filter_params(
+    data_filter_set, event_filter_params = construct_event_filter_params(
         event_abi=event_abi,
+        abi_codec=event_codec,
+        contract_address=event.address,
         argument_filters=argument_filters,
-        from_block=from_block,
-        to_block=to_block,
+        fromBlock=from_block,
+        toBlock=to_block,
         address=address,
         topics=topics
     )
-
-    return event.event_contract.call().getLogs(*event_filter_params)
+    
+    events = event.web3.eth.getLogs(event_filter_params)
+    
+    for log in events:
+        formatted_topic = eth_utils.to_bytes(log['topics'][0])
+        if formatted_topic.hex() == TRANSFER_TOPIC:
+            yield process_event(log)

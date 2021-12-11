@@ -1,8 +1,22 @@
-from web3 import Web3, HTTPProvider
+import eth_utils
+from web3 import Web3, HTTPProvider, WebsocketProvider
 import json
 import requests
-from config import ETHERSCAN_API_KEY
+from app.config import ETHERSCAN_API_KEY
 
+
+def format_address(address):
+    """
+    Removes trailing 0's from an address
+    Ethereum addresses are only 20 bytes long, 
+    sometimes we receive an address with trailing 0's,
+    """
+    bytes = eth_utils.to_bytes(address)
+
+    # get the last 20 bytes only
+    address_bytes = bytes[-20:]
+    return eth_utils.to_checksum_address(address_bytes)
+        
 
 def instantiate_web3(url):
     """
@@ -10,6 +24,8 @@ def instantiate_web3(url):
     """
     if isinstance(url, Web3):
         return url
+    elif url.startswith('wss'):
+        return Web3(WebsocketProvider(url))
     else:
         return Web3(HTTPProvider(url))
 
@@ -23,23 +39,17 @@ def fetch_abi(address, erc20=False, erc721=False):
     abi_fetch = requests.get(url)
     
     if abi_fetch.status_code == 200:
-        abi = abi_fetch.json()['result']
-        return abi
+        response_json = abi_fetch.json()
+        abi_json = json.loads(response_json['result'])
+        return abi_json
     
-    if erc20:
-        with open('../abi/default-erc20.json') as abi:
-            return json.load(abi)
-    
-    elif erc721:
-        with open('../abi/default-erc721.json') as abi:
-            return json.load(abi)
+    else:
+        if erc20:
+            with open('app/abi/default-erc20.json') as abi:
+                return json.load(abi)
+        
+        elif erc721:
+            with open('app/abi/default-erc721.json') as abi:
+                return json.load(abi)
     
     return None
-
-
-def get_logs(contract, event_type, start_block=0, end_block='latest'):
-    """
-    Get logs of a given contract
-    """
-    contract.get_past_events(event_type,)
-    
