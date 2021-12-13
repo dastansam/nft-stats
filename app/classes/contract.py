@@ -5,7 +5,7 @@ manipulating data and interacting with the blockchain.
 """
 import csv
 from app.utils import fetch_abi
-from app.events import fetch_events
+from app.ethereum import fetch_events
 
 """
 A base abstract class that represents a Contract in Ethereum
@@ -17,12 +17,10 @@ class BaseContract:
     """
     Contract contstructor
     """
-    def __init__(self, web3, address, abi, name=None, symbol=None):
+    def __init__(self, web3, address, abi):
         self.web3 = web3     
         self.address = address
         self.abi = abi
-        self.name = name
-        self.symbol = symbol
 
     def to_token_contract(self):
         """
@@ -30,7 +28,7 @@ class BaseContract:
         """
         contract = self.web3.eth.contract(address=self.address, abi=self.abi)
         return contract
-    
+  
 
 """
 Class that represents an ERC20 token contract in Ethereum
@@ -42,21 +40,15 @@ class ERC20Contract(BaseContract):
     """
     def __init__(self, web3, address, abi=None, name=None, symbol=None):
         if abi:
-            super().__init__(web3, address, abi, name, symbol)
+            super().__init__(web3, address, abi)
         else:
             fetched_abi = fetch_abi(address, erc20=True)
             if fetched_abi:
-                super().__init__(web3, address, abi=fetched_abi, name=name, symbol=symbol)
+                super().__init__(web3, address, abi=fetched_abi)
             else:
                 raise Exception("Could not fetch ABI for contract at address {}".format(address))
-
-    def get_transfers(self, from_block=0, to_block='latest'):
-        """
-        Get all transfers from the contract
-        """
-        pass
     
-    def get_holders(self, from_block=0, to_block='latest'):
+    def get_holders(self):
         """
         Get all holders of the contract
         """
@@ -76,6 +68,7 @@ class ERC20Contract(BaseContract):
             to_block = self.web3.eth.block_number
         
         file_name = self.name if self.name is not None else self.address
+        
         with open('app/data/{}.csv'.format(file_name), 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=['from', 'to', 'value'])
             writer.writeheader()
@@ -96,7 +89,7 @@ class ERC20Contract(BaseContract):
                 to_block = from_block + 1
                 from_block = to_block - 1000
                 
-                if from_block < 0:
+                if from_block <= 0:
                     break
                 
                 events = list(fetch_events(
@@ -125,12 +118,18 @@ class ERC721Contract(BaseContract):
     """
     ERC721 Contract contstructor
     """
-    def __init__(self, web3, address, abi=None, name=None, symbol=None):
+    def __init__(self, web3, address, abi=None):
         if abi:
-            super().__init__(web3, address, abi, name, symbol)
+            super().__init__(web3, address, abi)
         else:
             fetched_abi = fetch_abi(address, erc721=True)
             if fetch_abi:
-                super().__init__(web3, address, abi=fetched_abi, name=name, symbol=symbol)
+                super().__init__(web3, address, abi=fetched_abi)
             else:
                 raise Exception("Could not fetch ABI for contract at address {}".format(address))
+
+    def get_holders(self, from_block=0, to_block='latest'):
+        """
+        Get all holders of the contract
+        """
+        

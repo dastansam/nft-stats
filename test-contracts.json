@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Wizards and Dragons",
+        "type": "ERC721",
+        "symbol": "WIZ",
+        "address": "0x999e88075692bCeE3dBC07e7E64cD32f39A1D3ab"
+    },
+    {
+        "name": "anyswap",
+        "type": "ERC20",
+        "symbol": "any",
+        "address": "0xf99d58e463A2E07e5692127302C20A191861b4D6"
+    },
+    {
+        "name": "TetherGold",
+        "type": "ERC20",
+        "symbol": "tgld",
+        "address": "0x68749665ff8d2d112fa859aa293f07a622782f38"
+    },
+    {
+        "name": "Alice",
+        "type": "ERC20",
+        "symbol": "ALC",
+        "address": "0xac51066d7bec65dc4589368da368b212745d63e8"
+    },
+    {
+        "name": "Gold Hunt Game: GOLDH Token",
+        "type": "ERC721",
+        "symbol": "GOLDH",
+        "address": "0x66fCA7555CD481545A5e66bA9a2bEC1e256F98e7"
+    },
+    {
+        "name": "Cryptoadz: TOADZ Token",
+        "type": "ERC721",
+        "symbol": "TOADZ",
+        "address": "0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6"
+    },
+    {
+        "name": "Vader",
+        "type": "ERC20",
+        "symbol": "VAD",
+        "address": "0x2602278ee1882889b946eb11dc0e810075650983"
+    }
+]
