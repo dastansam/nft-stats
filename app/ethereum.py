@@ -1,3 +1,7 @@
+"""
+Contains functions for interacting with the Ethereum blockchain.
+"""
+
 import eth_utils
 from web3._utils.filters import construct_event_filter_params
 from app.utils import format_address
@@ -64,6 +68,8 @@ def fetch_events(
     :type address: str
     :param topics: The topics to filter by.
     :type topics: list(str)
+    :param erc721: Whether to fetch ERC721 events.
+    :type erc721: bool
     :return: The events.
     :rtype: list(dict)
     """
@@ -90,7 +96,7 @@ def fetch_events(
         topics=topics
     )
     
-    events = event.web3.eth.getLogs(event_filter_params)
+    events = event.web3.eth.get_logs(event_filter_params)
     
     for log in events:
         formatted_topic = eth_utils.to_bytes(log['topics'][0])
@@ -101,24 +107,33 @@ def fetch_events(
 def update_balances(holders, events, erc721=False):
     """
     Updates the balance of a holder
-    Args:
-        holders ([type]): [description]
-        events ([type]): [description]
+    :param holders: The holders.
+    :type holders: dict
+    :param events: The events.
+    :type events: list(list)
     """
     if erc721:
-        for index, transfer_event in events.iterrows():
-            # remove tokenId from from holder if transfer_event['from']                
-            holders[transfer_event['to']]['tokens'].append(transfer_event['tokenId'])
+        for row in events:
+            # pass if it's header row
+            if row[0] == 'from' or row[2] == 'token_id':
+                continue
             
-            initial_from_tokens = holders[transfer_event['from']]['tokens']
-            filtered_from_tokens = [token for token in initial_from_tokens if token != transfer_event['tokenId']]
-            holders[transfer_event['from']]['tokens'] = filtered_from_tokens
+            [from_, to, token_id, block_number] = row
+            # remove tokenId from from holder if transfer_event['from']                
+            holders[to]['tokens'].append(token_id)
+            
+            initial_from_tokens = holders[from_]['tokens']
+            filtered_from_tokens = [token for token in initial_from_tokens if token != token_id]
+            holders[from_]['tokens'] = filtered_from_tokens
             
         return holders
                      
-    for index, transfer_event in events.iterrows():
-        holders[transfer_event['from']]['balance'] -= transfer_event['value']
-        holders[transfer_event['to']]['balance'] += transfer_event['value']
+    for row in events:
+        if row[0] == 'from' or row[2] == 'value':
+            continue
+        [from_, to, value, block_number] = row
+        holders[from_]['balance'] -= int(value)
+        holders[to]['balance'] += int(value)
         
     return holders
 
@@ -129,13 +144,31 @@ def do_record_transactions(
     file_name, 
     initial_from_block, 
     initial_to_block,
-    erc721=False
+    block_range=1000,
+    erc721=False,
+    output=None,
 ):
     """
     Records all transactions of a contract in csv file
     Infura only allows to fetch events in the span of 1000 blocks
     Therefore, we need to fetch the events in batches
     and stop the loop when we have zero events in 1000 blocks
+    :param address: The contract address.
+    :type address: str
+    :param web3_contract: The web3 contract.
+    :type web3_contract: web3.contract.Contract
+    :param file_name: The file name.
+    :type file_name: str
+    :param initial_from_block: The initial from block.
+    :type initial_from_block: int
+    :param initial_to_block: The initial to block.
+    :param block_range: The block range.
+    :type block_range: int
+    :param erc721: Whether to fetch ERC721 events.
+    :type erc721: bool
+    :param output: The output file
+    :type output: str
+    :return: void
     """
     transactions = pd.DataFrame(columns=[
         'from', 
@@ -158,12 +191,10 @@ def do_record_transactions(
     
     # add events to transactions
     transactions = transactions.append(events)
-    
-    initial_block_range = 5000
-    
+        
     while True:
         initial_to_block = initial_from_block + 1
-        initial_from_block = initial_to_block - initial_block_range
+        initial_from_block = initial_to_block - block_range
         
         if initial_from_block < 0:
             break
@@ -178,15 +209,16 @@ def do_record_transactions(
             )
             
             transactions_count = len(events)
-            print('Applying {} events'.format(transactions_count))
+            print('Storing {} transfer events'.format(transactions_count))
             transactions = transactions.append(events)
             
-        except Exception as e:
-            print(e)
+        except Exception:
             break
 
         if transactions_count == 0:
             break
     
     print('Writing to file {}'.format(file_name))
-    transactions.to_csv('app/data/{}.csv'.format(file_name), index=False)
+    output_path = output if output else 'app/data/{}.csv'.format(file_name)
+    
+    transactions.to_csv(output_path, index=False)

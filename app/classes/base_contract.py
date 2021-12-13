@@ -15,7 +15,7 @@ class BaseContract:
 
     def to_token_contract(self):
         """
-        Converts the contract to a web3 contract
+        Converts the contract to a web3 contract instance
         """
         contract = self.web3.eth.contract(address=self.address, abi=self.abi)
         return contract

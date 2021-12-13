@@ -1,0 +1,16 @@
+(venv) dastansamat@Dastans-MacBook-Pro nft-stats % coverage report
+--------------------------------------------------
+app/__init__.py                    0      0   100%
+app/classes/__init__.py            0      0   100%
+app/classes/base_contract.py       8      0   100%
+app/classes/erc20.py              45      3    93%
+app/classes/erc721.py             44      2    95%
+app/config.py                      6      0   100%
+app/ethereum.py                   69      4    94%
+app/utils.py                      21      1    95%
+test/__init__.py                   0      0   100%
+test/test_erc20.py                38      1    97%
+test/test_erc721.py               38      1    97%
+test/test_utils.py                21      1    95%
+--------------------------------------------------
+TOTAL                            290     13    96%

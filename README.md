@@ -33,7 +33,8 @@ While loop will decrement the `to_block` and `from_block` arguments by 1000 in e
       - Contains functions that are used for interacting with Ethereum chain
     - `utils.py`
       - Contains utility functions used across the project
-
+    - `parser.py`
+      - Contains command line argument parser configuration
     - `classes`
       - Contains classes that represent types of tokens
       - `base_contract.py`
