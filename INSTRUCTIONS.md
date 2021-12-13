@@ -62,5 +62,17 @@ Finally, just watch how script performs, if it fails with `more than 10000 event
 
 To perform the tests:
 ```
+python -m unittest
+```
 
+To run coverage:
+
+```
+coverage run -m unittest
+```
+
+To get coverage report:
+
+```
+coverage report
 ```
