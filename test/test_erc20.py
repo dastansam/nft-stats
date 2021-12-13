@@ -38,9 +38,9 @@ class ERC20Test(unittest.TestCase):
         from_block = contract.web3.eth.block_number
         
         contract.record_transactions(
-            from_block=from_block - 1000,
+            from_block=from_block - 50000,
             to_block=contract.web3.eth.block_number,
-            block_range=1000,
+            block_range=50000,
             output="test/expected-data/TEST_erc_20_transfers_generated.csv"
         )
         

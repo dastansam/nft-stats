@@ -48,6 +48,7 @@ These are the breakdown of arguments:
 -s, --symbol: Symbol of the token
 -r, --blockrange: Block ranges to use for querying Transfer events from Ethereum chain
 -i, --infile: A boolean flag that indicates whether transactions csv file is already populated
+-o, --outfile: Output file
 -c, --erc721: A boolean flag that indicates whether contract is an ERC721 token
 ```
 
